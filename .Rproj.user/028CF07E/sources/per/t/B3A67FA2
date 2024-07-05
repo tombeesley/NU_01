@@ -1,0 +1,33 @@
+{
+    "id": "B3A67FA2",
+    "path": "D:/Repos/Research/NU_01/tb_analysis_NU_01.qmd",
+    "project_path": "tb_analysis_NU_01.qmd",
+    "type": "quarto_markdown",
+    "hash": "1532551435",
+    "contents": "",
+    "dirty": false,
+    "created": 1720171015667.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "rmdVisualMode": "false",
+        "rmdVisualWrapConfigured": "true",
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "127,0",
+        "scrollLine": "96",
+        "docOutlineVisible": "1",
+        "rmdVisualCollapsedChunks": "",
+        "rmdVisualModeLocation": "2:0",
+        "chunk_output_type": "console"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1720186101,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1720186101939,
+    "read_only": false,
+    "read_only_alternatives": []
+}

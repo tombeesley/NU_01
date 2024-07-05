@@ -1,0 +1,130 @@
+---
+title: "tb_analysis_NU_01"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+
+load("NE01_all_data.RData")
+
+
+```
+
+```{r}
+
+head(all_training_data)
+
+# phase 1 summary
+summary_stats_p1 <- 
+  all_training_data %>% 
+  filter(block <= 15) %>% 
+  group_by(pNum) %>% 
+  summarise(meanRT_p1 = mean(RT),
+            meanAcc_p1 = mean(accuracy))
+
+summary_stats_p1 %>% 
+  ggplot(aes(meanAcc_p1)) +
+  geom_histogram()
+
+summary_stats_p1 %>% 
+  ggplot(aes(meanRT_p1)) +
+  geom_histogram()
+
+weak_acc_p1 <- 
+  filter(summary_stats_p1, meanAcc_p1 < .8) %>% 
+  pull(pNum)
+
+# phase 2 summary
+summary_stats_p2 <- 
+  all_training_data %>% 
+  filter(block > 15) %>% 
+  group_by(pNum) %>% 
+  summarise(meanRT_p2 = mean(RT),
+            meanAcc_p2 = mean(accuracy))
+
+weak_acc_p2 <- 
+  filter(summary_stats_p2, meanAcc_p2 < .7) %>% 
+  pull(pNum)
+
+
+# join the summary stats to the main data
+all_training_data <- 
+  all_training_data %>% 
+  left_join(summary_stats_p1, by = "pNum") %>% 
+  left_join(summary_stats_p2, by = "pNum")
+
+
+```
+
+# training data
+
+```{r}
+
+training_avgs <- 
+  all_training_data %>% 
+  group_by(pNum, block) %>% 
+  summarise(blockAcc = mean(accuracy, na.rm = TRUE))
+
+training_avgs %>% 
+  ggplot(aes(x = block, y = blockAcc)) +
+  geom_line() +
+  facet_wrap(~pNum)
+
+#plot group averages for training phases
+training_avgs %>% 
+  filter(!pNum %in% weak_acc_p1) %>% 
+  group_by(block) %>% 
+  summarise(meanAcc = mean(blockAcc),
+            seAcc = sd(blockAcc)/sqrt(n())) %>% 
+  ggplot(aes(x = block, y = meanAcc)) +
+  geom_line() +
+  geom_errorbar(aes(ymin = meanAcc - seAcc, ymax = meanAcc + seAcc),
+                width = .2,
+                alpha = .5) + 
+  theme_classic()
+
+```
+
+# test data
+
+```{r}
+
+test_summary <- 
+  all_test_data %>% 
+  group_by(pNum, cue) %>% 
+  summarise(o1 = mean(test.resp1),
+            o2 = mean(test.resp2)) %>% 
+  pivot_longer(cols = o1:o2, names_to = "outcome", values_to = "rating") %>% 
+  mutate(cue = as.factor(cue))
+
+# good performers
+test_summary %>% 
+  filter(!pNum %in% weak_acc_p2) %>%
+  group_by(cue, outcome) %>% 
+  summarise(avg_rating = mean(rating),
+            se_rating = sd(rating)/sqrt(n())) %>% 
+  ggplot(aes(x = cue, fill = outcome, y = avg_rating)) +
+  geom_col(position = position_dodge2(),
+           colour = "black") +
+  geom_errorbar(aes(ymin = avg_rating, ymax = avg_rating + se_rating),
+                position = position_dodge(.9),
+                width = .2)
+
+test_summary %>% 
+  filter(!pNum %in% weak_acc_p2) %>%
+  group_by(pNum, cue, outcome) %>% 
+  summarise(avg_rating = mean(rating)) %>% 
+  ggplot(aes(x = cue, fill = outcome, y = avg_rating)) +
+  geom_col(position = position_dodge2(),
+           colour = "black") +
+  facet_wrap(~pNum)
+  
+
+
+```
+
+
